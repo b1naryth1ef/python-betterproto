@@ -71,7 +71,13 @@ def get_ref_type(package: str, imports: set, type_name: str) -> str:
             cased = [stringcase.pascalcase(part) for part in parts]
             type_name = f'"{"".join(cased)}"'
 
-    if "." in type_name:
+    # Extract the "root" package
+    type_package_root = type_name.split(".", 1)[0]
+    package_root = package.split(".", 1)[0]
+    if type_package_root == package_root:
+        import_path, type_name = type_name.rsplit(".", 1)
+        imports.add(f"from {import_path} import {stringcase.pascalcase(type_name)}")
+    elif "." in type_name:
         # This is imported from another package. No need
         # to use a forward ref and we need to add the import.
         parts = type_name.split(".")
